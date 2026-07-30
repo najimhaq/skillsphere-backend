@@ -1,12 +1,11 @@
 import 'dotenv/config';
-
 import cors from 'cors';
 import express, { type Request, type Response } from 'express';
-import { toNodeHandler } from 'better-auth/node';
-
+import { fromNodeHeaders, toNodeHandler } from 'better-auth/node';
 import { connectDatabase } from './config/db.js';
 import { env } from './config/env.js';
 import { auth } from './lib/auth.js';
+import meRouter from './route/meRoutes.js';
 
 const app = express();
 
@@ -24,6 +23,9 @@ app.get('/api/health', (_req: Request, res: Response) => {
     environment: env.NODE_ENV,
   });
 });
+
+//better auth session pawa jabe
+app.use('/api', meRouter);
 
 // Better Auth handler must be before express.json()
 app.all('/api/auth/*splat', toNodeHandler(auth));
