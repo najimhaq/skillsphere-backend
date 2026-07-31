@@ -6,6 +6,7 @@ import { connectDatabase } from './config/db.js';
 import { env } from './config/env.js';
 import { auth } from './lib/auth.js';
 import meRouter from './route/meRoutes.js';
+import testRouter from './route/testRoutes.js';
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
 
 //better auth session pawa jabe
 app.use('/api', meRouter);
+app.use('/api', testRouter);
 
 // Better Auth handler must be before express.json()
 app.all('/api/auth/*splat', toNodeHandler(auth));
