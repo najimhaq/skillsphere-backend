@@ -84,7 +84,12 @@ const courseSchema = new Schema<ICourse>(
     timestamps: true,
   }
 );
+courseSchema.index({
+  status: 1,
+  category: 1,
+  level: 1,
+  createdAt: -1,
+});
 
 export const Course =
   mongoose.models.Course || mongoose.model<ICourse>('Course', courseSchema);
-

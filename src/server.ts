@@ -8,6 +8,7 @@ import { auth } from './lib/auth.js';
 import meRouter from './route/meRoutes.js';
 import testRouter from './route/testRoutes.js';
 import courseRouter from './route/course.routes.js';
+import enrollmentRouter from './route/enrollment.routes.js';
 
 const app = express();
 
@@ -38,6 +39,8 @@ app.use('/api', meRouter);
 app.use('/api', testRouter);
 //course route
 app.use('/api/courses', courseRouter);
+//enrollment route
+app.use('/api/enrollments', enrollmentRouter);
 
 const startServer = async (): Promise<void> => {
   await connectDatabase();
