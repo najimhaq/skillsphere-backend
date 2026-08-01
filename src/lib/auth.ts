@@ -9,7 +9,7 @@ export const auth = betterAuth({
 
   baseURL: env.BETTER_AUTH_URL,
 
-  trustedOrigins: [env.FRONTEND_URL],
+  trustedOrigins: [env.FRONTEND_URL ?? 'http://localhost:3000'],
 
   emailAndPassword: {
     enabled: true,
