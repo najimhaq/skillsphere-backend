@@ -7,6 +7,7 @@ import { env } from './config/env.js';
 import { auth } from './lib/auth.js';
 import meRouter from './route/meRoutes.js';
 import testRouter from './route/testRoutes.js';
+import courseRouter from './route/course.routes.js';
 
 const app = express();
 
@@ -25,14 +26,18 @@ app.get('/api/health', (_req: Request, res: Response) => {
   });
 });
 
-//better auth session pawa jabe
-app.use('/api', meRouter);
-app.use('/api', testRouter);
 
 // Better Auth handler must be before express.json()
 app.all('/api/auth/*splat', toNodeHandler(auth));
 
 app.use(express.json());
+
+
+//better auth session pawa jabe
+app.use('/api', meRouter);
+app.use('/api', testRouter);
+//course route
+app.use('/api/courses', courseRouter);
 
 const startServer = async (): Promise<void> => {
   await connectDatabase();

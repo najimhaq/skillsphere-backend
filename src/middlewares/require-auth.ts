@@ -1,3 +1,4 @@
+// src/middlewares/require-auth.ts
 import type { NextFunction, Request, Response } from 'express';
 import { fromNodeHeaders } from 'better-auth/node';
 
@@ -10,8 +11,8 @@ export const requireAuth = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    console.log('Incoming cookie:', req.headers.cookie);
-    console.log('Incoming origin:', req.headers.origin);
+    // console.log('Incoming cookie:', req.headers.cookie);
+    // console.log('Incoming origin:', req.headers.origin);
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(req.headers),
     });
