@@ -12,7 +12,13 @@ import {
   updateCourse,
   deleteCourse,
   submitCourseForReview,
+  getMyCourseById,
 } from '../controller/course.controller.js';
+import {
+  createCourseSection,
+  createLesson,
+  getCourseContent,
+} from '../controller/course-content.controller.js';
 
 const courseRouter = Router();
 
@@ -52,6 +58,34 @@ courseRouter.delete(
   requireAuth,
   requireRole('INSTRUCTOR', 'ADMIN'),
   asyncHandler(deleteCourse)
+);
+
+courseRouter.get(
+  '/my-courses/:courseId',
+  requireAuth,
+  requireRole('INSTRUCTOR', 'ADMIN'),
+  asyncHandler(getMyCourseById)
+);
+//course content route
+courseRouter.get(
+  '/:courseId/content',
+  requireAuth,
+  requireRole('INSTRUCTOR', 'ADMIN'),
+  asyncHandler(getCourseContent)
+);
+
+courseRouter.post(
+  '/:courseId/sections',
+  requireAuth,
+  requireRole('INSTRUCTOR', 'ADMIN'),
+  asyncHandler(createCourseSection)
+);
+
+courseRouter.post(
+  '/sections/:sectionId/lessons',
+  requireAuth,
+  requireRole('INSTRUCTOR', 'ADMIN'),
+  asyncHandler(createLesson)
 );
 
 courseRouter.get('/:slug', asyncHandler(getPublishedCourseBySlug));

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const { Schema, model, models } = mongoose;
+const { Schema } = mongoose;
 
 import type { ICourse } from '../types/course.js';
 import { COURSE_LEVELS, COURSE_STATUSES } from '../types/course.js';

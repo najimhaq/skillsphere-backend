@@ -178,6 +178,47 @@ export const getMyCourses = async (
   });
 };
 
+//published howar purbe instructor ba admin course ta dekhte parbe, tai getMyCourseById function e authentication check kora hoyeche. Ekhane user er role o check kora hoyeche je user ki course er owner naki admin. Jodi na hoy, tahole 403 error return kora hoyeche.
+export const getMyCourseById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const user = req.authUser;
+
+  if (!user) {
+    res.status(401).json({
+      success: false,
+      message: 'Authentication required',
+    });
+    return;
+  }
+
+  const courseIdParam = req.params.courseId;
+  const courseId = Array.isArray(courseIdParam)
+    ? courseIdParam[0]
+    : courseIdParam;
+
+  const result = await getCourseForManagement(
+    courseId,
+    user.id,
+    user.role
+  );
+
+  if ('error' in result && result.error) {
+    res.status(result.error.statusCode).json({
+      success: false,
+      message: result.error.message,
+    });
+    return;
+  }
+
+  res.status(200).json({
+    success: true,
+    data: result.course,
+  });
+};
+
+//published course er slug diye course details dekhte parbe, tai getPublishedCourseBySlug function e authentication check kora hoyni. Ekhane sudhu published course gulo return kora hoyeche.
 export const getPublishedCourseBySlug = async (
   req: Request,
   res: Response
