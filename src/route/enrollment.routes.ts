@@ -5,6 +5,7 @@ import {
   enrollInCourse,
   getMyEnrollments,
 } from '../controller/enrollment.controller.js';
+import { requireRole } from '../middlewares/require-role.js';
 
 const enrollmentRouter = Router();
 enrollmentRouter.get(
@@ -16,6 +17,7 @@ enrollmentRouter.get(
 enrollmentRouter.post(
   '/courses/:courseId/enroll',
   requireAuth,
+  requireRole('STUDENT'),
   asyncHandler(enrollInCourse)
 );
 

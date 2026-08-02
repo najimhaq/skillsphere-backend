@@ -19,6 +19,13 @@ export const enrollInCourse = async (
     });
     return;
   }
+  if (user.role !== 'STUDENT') {
+    res.status(403).json({
+      success: false,
+      message: 'Only students can enroll in courses.',
+    });
+    return;
+  }
 
   if (!Types.ObjectId.isValid(user.id)) {
     res.status(400).json({
