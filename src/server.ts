@@ -10,6 +10,7 @@ import testRouter from './route/testRoutes.js';
 import courseRouter from './route/course.routes.js';
 import enrollmentRouter from './route/enrollment.routes.js';
 import lessonRouter from './route/lesson.routes.js';
+import sectionRouter from './route/section.routes.js';
 
 const app = express();
 
@@ -44,6 +45,8 @@ app.use('/api/courses', courseRouter);
 app.use('/api/enrollments', enrollmentRouter);
 //lesson route
 app.use('/api/lessons', lessonRouter);
+//section route
+app.use('/api/sections', sectionRouter);
 
 const startServer = async (): Promise<void> => {
   await connectDatabase();

@@ -5,6 +5,7 @@ import { fromNodeHeaders } from 'better-auth/node';
 import { auth } from '../lib/auth.js';
 import { isUserRole } from '../types/auth.js';
 
+
 export const requireAuth = async (
   req: Request,
   res: Response,

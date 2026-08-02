@@ -268,13 +268,27 @@ export const deleteLesson = async (
     return;
   }
 
+  const deletedLessonOrder = lesson.order;
+  const sectionId = lesson.sectionId;
+
   await lesson.deleteOne();
+
+  await Lesson.updateMany(
+    {
+      sectionId,
+      order: { $gt: deletedLessonOrder },
+    },
+    {
+      $inc: { order: -1 },
+    }
+  );
 
   res.status(200).json({
     success: true,
     message: 'Lesson deleted successfully',
     data: {
       _id: lesson._id,
+      sectionId,
     },
   });
 };
