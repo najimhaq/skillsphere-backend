@@ -1,3 +1,4 @@
+//src/server.ts
 import 'dotenv/config';
 import cors from 'cors';
 import express, { type Request, type Response } from 'express';
@@ -11,6 +12,10 @@ import courseRouter from './route/course.routes.js';
 import enrollmentRouter from './route/enrollment.routes.js';
 import lessonRouter from './route/lesson.routes.js';
 import sectionRouter from './route/section.routes.js';
+import studentLearningRouter from './route/student-learning.routes.js';
+import lessonProgressRouter from './route/lesson-progress.routes.js';
+import certificateRouter from './route/certificate.routes.js';
+import studentDashboardRouter from './route/student-dashboard.routes.js';
 
 const app = express();
 
@@ -47,6 +52,14 @@ app.use('/api/enrollments', enrollmentRouter);
 app.use('/api/lessons', lessonRouter);
 //section route
 app.use('/api/sections', sectionRouter);
+//student learning route
+app.use('/api/learning', studentLearningRouter);
+//lesson progress route
+app.use('/api/lesson-progress', lessonProgressRouter);
+//certificate route
+app.use('/api/certificates', certificateRouter);
+//student dashboard route
+app.use('/api/dashboard/student', studentDashboardRouter);
 
 const startServer = async (): Promise<void> => {
   await connectDatabase();

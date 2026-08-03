@@ -1,3 +1,4 @@
+//src/lib/auth.ts - backend
 import { betterAuth } from 'better-auth';
 import { mongodbAdapter } from '@better-auth/mongo-adapter';
 

@@ -1,3 +1,4 @@
+//src/middlewares/require-role.ts
 import type { NextFunction, Request, Response } from 'express';
 
 import type { UserRole } from '../types/auth.js';

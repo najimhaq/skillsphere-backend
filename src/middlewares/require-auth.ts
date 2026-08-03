@@ -1,7 +1,6 @@
 // src/middlewares/require-auth.ts
 import type { NextFunction, Request, Response } from 'express';
 import { fromNodeHeaders } from 'better-auth/node';
-
 import { auth } from '../lib/auth.js';
 import { isUserRole } from '../types/auth.js';
 
