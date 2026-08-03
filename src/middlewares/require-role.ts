@@ -26,3 +26,5 @@ export const requireRole = (...allowedRoles: UserRole[]) => {
 };
 
 export const requireAdmin = requireRole('ADMIN');
+export const requireInstructor = requireRole('INSTRUCTOR');
+export const requireStudent = requireRole('STUDENT');
