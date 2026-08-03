@@ -16,7 +16,8 @@ import studentLearningRouter from './route/student-learning.routes.js';
 import lessonProgressRouter from './route/lesson-progress.routes.js';
 import certificateRouter from './route/certificate.routes.js';
 import studentDashboardRouter from './route/student-dashboard.routes.js';
-import instructorRoutes from './route/instructor.routes.js';
+import instructorRoutes from './route/instructor/instructor.routes.js';
+
 
 const app = express();
 
