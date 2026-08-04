@@ -1,4 +1,6 @@
+import { env } from '../../config/env.js';
 import type { Request, Response } from 'express';
+import { ObjectId } from 'mongodb';
 import { Types } from 'mongoose';
 import { client } from '../../config/mongo-client.js';
 import { InstructorProfile } from '../../models/instructor/instructor-profile.model.js';
@@ -428,6 +430,141 @@ export const updateInstructorSettings = async (
     res.status(400).json({
       success: false,
       message,
+    });
+  }
+};
+
+
+//image upload
+export const uploadInstructorProfileImage = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = req.authUser?.id;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: 'Authentication required',
+      });
+      return;
+    }
+
+    if (!req.file) {
+      res.status(400).json({
+        success: false,
+        message: 'Please select a JPEG, PNG, or WebP image under 5 MB.',
+      });
+      return;
+    }
+
+    const imgbbApiKey = process.env.IMGBB_API_KEY;
+
+    if (!imgbbApiKey) {
+      console.error('IMGBB_API_KEY is missing.');
+
+      res.status(500).json({
+        success: false,
+        message: 'Image upload service is not configured.',
+      });
+      return;
+    }
+
+    const uploadFormData = new FormData();
+
+    uploadFormData.append(
+      'image',
+      new Blob([new Uint8Array(req.file.buffer)], {
+        type: req.file.mimetype,
+      }),
+      req.file.originalname
+    );
+
+    uploadFormData.append(
+      'name',
+      `skillsphere-instructor-${userId}-${Date.now()}`
+    );
+
+    const imgbbResponse = await fetch(
+      `https://api.imgbb.com/1/upload?key=${encodeURIComponent(imgbbApiKey)}`,
+      {
+        method: 'POST',
+        body: uploadFormData,
+      }
+    );
+
+    const imgbbPayload = (await imgbbResponse.json()) as {
+      success?: boolean;
+      data?: {
+        url?: string;
+        display_url?: string;
+      };
+      error?: {
+        message?: string;
+      };
+    };
+
+    const imageUrl = imgbbPayload.data?.display_url ?? imgbbPayload.data?.url;
+
+    if (!imgbbResponse.ok || !imgbbPayload.success || !imageUrl) {
+      console.error(
+        `ImgBB upload failed: ${
+          imgbbPayload.error?.message ?? imgbbResponse.statusText
+        }`
+      );
+
+      res.status(502).json({
+        success: false,
+        message: 'Unable to upload image. Please try again.',
+      });
+      return;
+    }
+
+    const userResult = await client
+      .db('skillsphere')
+      .collection('user')
+      .updateOne(
+        {
+          _id: new ObjectId(userId),
+        },
+        {
+          $set: {
+            image: imageUrl,
+            updatedAt: new Date(),
+          },
+        }
+      );
+
+    if (userResult.matchedCount === 0) {
+      res.status(404).json({
+        success: false,
+        message: 'User account could not be found.',
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile image updated successfully.',
+      data: {
+        image: imageUrl,
+      },
+    });
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Unable to update profile image.';
+
+    console.error(`Upload instructor profile image error: ${message}`);
+
+    res.status(400).json({
+      success: false,
+      message:
+        message === 'Only JPEG, PNG, and WebP image files are allowed.'
+          ? message
+          : 'Unable to update profile image.',
     });
   }
 };

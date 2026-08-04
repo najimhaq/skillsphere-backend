@@ -22,9 +22,18 @@ export interface ICourse {
   category: string;
   level: CourseLevel;
   price: number;
-  thumbnailUrl?: string;
+  thumbnailUrl?: string | null;
+
   status: CourseStatus;
+
   instructorId: Types.ObjectId;
+
+  reviewNote?: string | null;
+
+  reviewedBy?: Types.ObjectId | null;
+
+  reviewedAt?: Date | null;
+
   createdAt: Date;
   updatedAt: Date;
 }

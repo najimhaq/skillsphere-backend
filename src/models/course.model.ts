@@ -79,6 +79,23 @@ const courseSchema = new Schema<ICourse>(
       required: true,
       index: true,
     },
+    reviewNote: {
+      type: String,
+      trim: true,
+      maxlength: 2000,
+      default: null,
+    },
+
+    reviewedBy: {
+      type: Schema.Types.ObjectId,
+      default: null,
+      index: true,
+    },
+
+    reviewedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

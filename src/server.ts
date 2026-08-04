@@ -17,6 +17,8 @@ import lessonProgressRouter from './route/lesson-progress.routes.js';
 import certificateRouter from './route/certificate.routes.js';
 import studentDashboardRouter from './route/student-dashboard.routes.js';
 import instructorRoutes from './route/instructor/instructor.routes.js';
+import adminRouter from './route/admin/admin.routes.js';
+import adminCourseRouter from './route/admin/admin-course.routes.js';
 
 
 const app = express();
@@ -64,6 +66,9 @@ app.use('/api/certificates', certificateRouter);
 app.use('/api/dashboard/student', studentDashboardRouter);
 //instructor route
 app.use('/api/instructor', instructorRoutes);
+//admin route
+app.use('/api/admin', adminRouter);
+app.use('/api/admin/courses', adminCourseRouter);
 
 const startServer = async (): Promise<void> => {
   await connectDatabase();

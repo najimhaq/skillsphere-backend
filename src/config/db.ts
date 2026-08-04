@@ -1,5 +1,6 @@
-import { env } from './env.js';
 import mongoose from 'mongoose';
+
+import { env } from './env.js';
 
 export const connectDatabase = async (): Promise<void> => {
   try {
@@ -17,4 +18,12 @@ export const connectDatabase = async (): Promise<void> => {
     console.error(`MongoDB connection failed: ${message}`);
     process.exit(1);
   }
+};
+
+export const getDb = () => {
+  if (mongoose.connection.readyState !== 1 || !mongoose.connection.db) {
+    throw new Error('MongoDB database connection is not ready.');
+  }
+
+  return mongoose.connection.db;
 };
