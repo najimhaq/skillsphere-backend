@@ -1,3 +1,4 @@
+// src/controller/admin/admin-user.controller.ts
 import type { Request, Response } from 'express';
 import type { ParsedQs } from 'qs';
 import { ObjectId } from 'mongodb';
@@ -9,6 +10,7 @@ import {
   type AccountStatus,
   type UserRole,
 } from '../../types/auth.js';
+import { createAdminActivityLog } from '../../utils/admin-activity-log.js';
 
 type UserDocument = {
   _id: ObjectId;
@@ -33,6 +35,7 @@ const getSingleQueryValue = (
 ): string | undefined => {
   if (Array.isArray(value)) {
     const firstValue = value[0];
+
     return typeof firstValue === 'string' ? firstValue : undefined;
   }
 
@@ -128,7 +131,6 @@ export const getAdminUsers = async (
 
     if (filter.$or) {
       filter.$and = [{ $or: filter.$or }, searchFilter];
-
       delete filter.$or;
     } else {
       Object.assign(filter, searchFilter);
@@ -191,12 +193,20 @@ export const updateAdminUserRole = async (
 ): Promise<void> => {
   const userId = getUserIdParam(req.params.userId);
   const role = req.body?.role as unknown;
-  const currentAdminId = req.authUser?.id;
+  const currentAdmin = req.authUser;
 
-  if (!currentAdminId) {
+  if (!currentAdmin) {
     res.status(401).json({
       success: false,
       message: 'Authentication required.',
+    });
+    return;
+  }
+
+  if (!ObjectId.isValid(currentAdmin.id)) {
+    res.status(400).json({
+      success: false,
+      message: 'Invalid admin identifier.',
     });
     return;
   }
@@ -219,7 +229,7 @@ export const updateAdminUserRole = async (
 
   const targetUserObjectId = new ObjectId(userId);
 
-  if (targetUserObjectId.toString() === currentAdminId) {
+  if (targetUserObjectId.toString() === currentAdmin.id) {
     res.status(400).json({
       success: false,
       message: 'You cannot change your own role.',
@@ -239,9 +249,9 @@ export const updateAdminUserRole = async (
     return;
   }
 
-  const targetCurrentRole = targetUser.role ?? 'STUDENT';
+  const previousRole = targetUser.role ?? 'STUDENT';
 
-  if (targetCurrentRole === role) {
+  if (previousRole === role) {
     res.status(400).json({
       success: false,
       message: 'This user already has the selected role.',
@@ -249,7 +259,7 @@ export const updateAdminUserRole = async (
     return;
   }
 
-  if (targetCurrentRole === 'ADMIN' && role !== 'ADMIN') {
+  if (previousRole === 'ADMIN' && role !== 'ADMIN') {
     const totalAdmins = await usersCollection.countDocuments({
       role: 'ADMIN',
     });
@@ -293,6 +303,29 @@ export const updateAdminUserRole = async (
     }
   );
 
+  await createAdminActivityLog({
+    actor: {
+      id: currentAdmin.id,
+      name: currentAdmin.name,
+      email: currentAdmin.email,
+    },
+
+    action: 'USER_ROLE_CHANGED',
+
+    targetType: 'USER',
+    targetId: targetUserObjectId,
+    targetName: targetUser.name,
+    targetEmail: targetUser.email,
+
+    previousValue: {
+      role: previousRole,
+    },
+
+    nextValue: {
+      role,
+    },
+  });
+
   res.status(200).json({
     success: true,
     message: 'User role updated successfully.',
@@ -316,12 +349,20 @@ export const updateAdminUserAccountStatus = async (
 ): Promise<void> => {
   const userId = getUserIdParam(req.params.userId);
   const accountStatus = req.body?.accountStatus as unknown;
-  const currentAdminId = req.authUser?.id;
+  const currentAdmin = req.authUser;
 
-  if (!currentAdminId) {
+  if (!currentAdmin) {
     res.status(401).json({
       success: false,
       message: 'Authentication required.',
+    });
+    return;
+  }
+
+  if (!ObjectId.isValid(currentAdmin.id)) {
+    res.status(400).json({
+      success: false,
+      message: 'Invalid admin identifier.',
     });
     return;
   }
@@ -344,7 +385,7 @@ export const updateAdminUserAccountStatus = async (
 
   const targetUserObjectId = new ObjectId(userId);
 
-  if (targetUserObjectId.toString() === currentAdminId) {
+  if (targetUserObjectId.toString() === currentAdmin.id) {
     res.status(400).json({
       success: false,
       message: 'You cannot change your own account status.',
@@ -364,9 +405,9 @@ export const updateAdminUserAccountStatus = async (
     return;
   }
 
-  const currentStatus = targetUser.accountStatus ?? 'ACTIVE';
+  const previousAccountStatus = targetUser.accountStatus ?? 'ACTIVE';
 
-  if (currentStatus === accountStatus) {
+  if (previousAccountStatus === accountStatus) {
     res.status(400).json({
       success: false,
       message: `This user is already ${accountStatus.toLowerCase()}.`,
@@ -380,7 +421,7 @@ export const updateAdminUserAccountStatus = async (
       $or: [
         { accountStatus: 'ACTIVE' },
         { accountStatus: { $exists: false } },
-        { accountStatus: { $in: [null] } },
+        { accountStatus: null },
       ],
     } as any);
 
@@ -422,6 +463,30 @@ export const updateAdminUserAccountStatus = async (
       },
     }
   );
+
+  await createAdminActivityLog({
+    actor: {
+      id: currentAdmin.id,
+      name: currentAdmin.name,
+      email: currentAdmin.email,
+    },
+
+    action:
+      accountStatus === 'SUSPENDED' ? 'USER_SUSPENDED' : 'USER_REACTIVATED',
+
+    targetType: 'USER',
+    targetId: targetUserObjectId,
+    targetName: targetUser.name,
+    targetEmail: targetUser.email,
+
+    previousValue: {
+      accountStatus: previousAccountStatus,
+    },
+
+    nextValue: {
+      accountStatus,
+    },
+  });
 
   res.status(200).json({
     success: true,

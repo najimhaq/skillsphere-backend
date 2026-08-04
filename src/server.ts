@@ -20,6 +20,9 @@ import instructorRoutes from './route/instructor/instructor.routes.js';
 import adminRouter from './route/admin/admin.routes.js';
 import adminCourseRouter from './route/admin/admin-course.routes.js';
 import adminUserRouter from './route/admin/admin-user.routes.js';
+import adminActivityLogRouter from './route/admin/admin-activity-log.routes.js';
+import adminProfileRouter from './route/admin/admin-profile.routes.js';
+import adminSettingsRouter from './route/admin/admin-settings.routes.js';
 
 
 const app = express();
@@ -71,6 +74,9 @@ app.use('/api/instructor', instructorRoutes);
 app.use('/api/admin', adminRouter);
 app.use('/api/admin/courses', adminCourseRouter);
 app.use('/api/admin/users', adminUserRouter);
+app.use('/api/admin/profile', adminProfileRouter);
+app.use('/api/admin/settings', adminSettingsRouter);
+app.use('/api/admin/activity-logs', adminActivityLogRouter);
 
 const startServer = async (): Promise<void> => {
   await connectDatabase();

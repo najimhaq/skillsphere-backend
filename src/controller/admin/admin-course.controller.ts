@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { Types } from 'mongoose';
 
 import { Course } from '../../models/course.model.js';
+import { createAdminActivityLog } from '../../utils/admin-activity-log.js';
 
 type ReviewAction = 'PUBLISH' | 'REJECT' | 'REQUEST_CHANGES';
 
@@ -36,6 +37,15 @@ const reviewActionMap: Record<
       'Changes requested successfully. The course was returned to draft.',
     noteRequired: true,
   },
+};
+
+const reviewActionToActivityAction: Record<
+  ReviewAction,
+  'COURSE_PUBLISHED' | 'COURSE_REJECTED' | 'COURSE_CHANGES_REQUESTED'
+> = {
+  PUBLISH: 'COURSE_PUBLISHED',
+  REJECT: 'COURSE_REJECTED',
+  REQUEST_CHANGES: 'COURSE_CHANGES_REQUESTED',
 };
 
 export const getAdminCourses = async (
@@ -121,14 +131,25 @@ export const reviewCourse = async (
   res: Response
 ): Promise<void> => {
   const courseIdParam = req.params.courseId;
-  const courseId = Array.isArray(courseIdParam) ? courseIdParam[0] : courseIdParam;
-  const { action, reviewNote } = req.body as ReviewRequestBody;
-  const adminId = req.authUser?.id;
+  const courseId = Array.isArray(courseIdParam)
+    ? courseIdParam[0]
+    : courseIdParam;
 
-  if (!adminId) {
+  const { action, reviewNote } = req.body as ReviewRequestBody;
+  const admin = req.authUser;
+
+  if (!admin) {
     res.status(401).json({
       success: false,
       message: 'Authentication required.',
+    });
+    return;
+  }
+
+  if (!Types.ObjectId.isValid(admin.id)) {
+    res.status(400).json({
+      success: false,
+      message: 'Invalid admin identifier.',
     });
     return;
   }
@@ -188,12 +209,38 @@ export const reviewCourse = async (
     return;
   }
 
+  const previousStatus = course.status;
+
   course.status = actionConfig.status;
   course.reviewNote = normalizedReviewNote || null;
-  course.reviewedBy = new Types.ObjectId(adminId);
+  course.reviewedBy = new Types.ObjectId(admin.id);
   course.reviewedAt = new Date();
 
   await course.save();
+
+  await createAdminActivityLog({
+    actor: {
+      id: admin.id,
+      name: admin.name,
+      email: admin.email,
+    },
+
+    action: reviewActionToActivityAction[action],
+
+    targetType: 'COURSE',
+    targetId: course._id,
+    targetName: course.title,
+
+    previousValue: {
+      status: previousStatus,
+    },
+
+    nextValue: {
+      status: course.status,
+    },
+
+    note: normalizedReviewNote || null,
+  });
 
   res.status(200).json({
     success: true,
@@ -201,3 +248,10 @@ export const reviewCourse = async (
     data: course,
   });
 };
+
+
+/*
+        { accountStatus: 'ACTIVE' },
+        { accountStatus: { $exists: false } },
+        { accountStatus: { $in: [null] } },
+         */

@@ -1,3 +1,4 @@
+// src/middlewares/upload-profile-image.ts
 import multer from 'multer';
 
 const allowedMimeTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);

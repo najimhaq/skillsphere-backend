@@ -1,3 +1,4 @@
+// src/controller/instructor/instructor-profile.controller.ts
 import { env } from '../../config/env.js';
 import type { Request, Response } from 'express';
 import { ObjectId } from 'mongodb';
@@ -311,7 +312,7 @@ export const updateInstructorProfile = async (
         },
       },
       {
-        new: true,
+        returnDocument: 'after',
         upsert: true,
         runValidators: true,
       }
@@ -398,7 +399,7 @@ export const updateInstructorSettings = async (
         },
       },
       {
-         returnDocument: 'after',
+        returnDocument: 'after',
         upsert: true,
         runValidators: true,
       }
@@ -433,7 +434,6 @@ export const updateInstructorSettings = async (
     });
   }
 };
-
 
 //image upload
 export const uploadInstructorProfileImage = async (

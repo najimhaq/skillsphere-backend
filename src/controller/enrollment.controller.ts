@@ -3,6 +3,7 @@ import { Types } from 'mongoose';
 
 import { Course } from '../models/course.model.js';
 import { Enrollment } from '../models/enrollment.model.js';
+import { PlatformSettings } from '../models/admin/platform-settings.model.js';
 
 export const enrollInCourse = async (
   req: Request,
@@ -23,6 +24,19 @@ export const enrollInCourse = async (
     res.status(403).json({
       success: false,
       message: 'Only students can enroll in courses.',
+    });
+    return;
+  }
+
+  const platformSettings = await PlatformSettings.findOne({
+    key: 'PLATFORM',
+  }).lean();
+
+  if (platformSettings && !platformSettings.allowNewEnrollments) {
+    res.status(503).json({
+      success: false,
+      message:
+        'New course enrollments are temporarily unavailable. Please try again later.',
     });
     return;
   }
