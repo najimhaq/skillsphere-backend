@@ -24,6 +24,13 @@ export const auth = betterAuth({
         defaultValue: 'STUDENT',
         input: false,
       },
+
+      accountStatus: {
+        type: 'string',
+        required: true,
+        defaultValue: 'ACTIVE',
+        input: false,
+      },
     },
   },
 });
