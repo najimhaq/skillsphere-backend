@@ -85,10 +85,14 @@ export const createCourseSection = async (
     return;
   }
 
-  if (result.course.status !== 'DRAFT' && user.role !== 'ADMIN') {
+  if (
+    result.course.status !== 'DRAFT' &&
+    result.course.status !== 'REJECTED' &&
+    user.role !== 'ADMIN'
+  ) {
     res.status(403).json({
       success: false,
-      message: 'Only draft courses can be updated',
+      message: 'Only draft or rejected courses can be updated',
     });
     return;
   }

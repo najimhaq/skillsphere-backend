@@ -1,3 +1,4 @@
+//src/controller/student-learning.controller.ts
 import { Types } from 'mongoose';
 import type { Request, Response } from 'express';
 
@@ -53,7 +54,7 @@ export const getEnrolledCourseLearningContent = async (
     Enrollment.findOne({
       studentId: new Types.ObjectId(user.id),
       courseId: courseObjectId,
-      status: 'ACTIVE',
+      status: { $in: ['ACTIVE', 'COMPLETED'] },
     }).lean(),
   ]);
 

@@ -1,3 +1,4 @@
+//src/types/lesson-progress.ts
 import type { Types } from 'mongoose';
 
 export interface ILessonProgress {

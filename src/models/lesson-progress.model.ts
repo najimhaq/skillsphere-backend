@@ -1,3 +1,4 @@
+//src/models/lesson-progress.model.ts
 import mongoose from 'mongoose';
 
 import type { ILessonProgress } from '../types/lesson-progress.js';

@@ -500,26 +500,30 @@ export const submitCourseForReview = async (
     return;
   }
 
-  if (result.course.status !== 'DRAFT') {
+  const allowedStatuses = ['DRAFT', 'REJECTED'] as const;
+
+  if (
+    !allowedStatuses.includes(
+      result.course.status as (typeof allowedStatuses)[number]
+    )
+  ) {
     res.status(400).json({
       success: false,
-      message: 'Only draft courses can be submitted for review',
+      message: 'Only draft or rejected courses can be submitted for review.',
     });
     return;
   }
 
   result.course.status = 'PENDING_REVIEW';
+  result.course.reviewNote = null;
+  result.course.reviewedBy = null;
+  result.course.reviewedAt = null;
+
   await result.course.save();
 
   res.status(200).json({
     success: true,
-    message: 'Course submitted for review',
+    message: 'Course submitted for review successfully.',
     data: result.course,
   });
 };
-
-// GET /api/courses?page=1&limit=12
-// GET /api/courses?category=Web%20Development
-// GET /api/courses?level=INTERMEDIATE
-// GET /api/courses?search=typescript
-// GET /api/courses?page=1&limit=12&category=Web%20Development&level=INTERMEDIATE

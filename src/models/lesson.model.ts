@@ -1,3 +1,4 @@
+//src/models/lesson.model.ts
 import mongoose, { Schema } from 'mongoose';
 
 export const LESSON_TYPES = ['VIDEO', 'ARTICLE'] as const;
