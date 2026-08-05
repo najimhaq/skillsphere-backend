@@ -1,8 +1,7 @@
-//src/server.ts
 import 'dotenv/config';
 import cors from 'cors';
 import express, { type Request, type Response } from 'express';
-import { fromNodeHeaders, toNodeHandler } from 'better-auth/node';
+import { toNodeHandler } from 'better-auth/node';
 import { connectDatabase } from './config/db.js';
 import { env } from './config/env.js';
 import { auth } from './lib/auth.js';
@@ -26,7 +25,6 @@ import adminSettingsRouter from './route/admin/admin-settings.routes.js';
 import { stripeWebhook } from './controller/payment/payment.controller.js';
 import paymentRouter from './route/payment/payment.routes.js';
 
-
 const app = express();
 
 app.use(
@@ -44,9 +42,9 @@ app.get('/api/health', (_req: Request, res: Response) => {
   });
 });
 
-
 // Better Auth handler must be before express.json()
 app.all('/api/auth/*splat', toNodeHandler(auth));
+
 app.post(
   '/api/payments/stripe/webhook',
   express.raw({
@@ -57,31 +55,41 @@ app.post(
 
 app.use(express.json());
 
-
-//better auth session pawa jabe
+// better auth session pawa jabe
 app.use('/api', meRouter);
 app.use('/api', testRouter);
-//course route for all course related endpoints
+
+// course route for all course related endpoints
 app.use('/api/courses', courseRouter);
-//enrollment route for student enrollment related endpoints
+
+// enrollment route for student enrollment related endpoints
 app.use('/api/enrollments', enrollmentRouter);
-//payment route
+
+// payment route
 app.use('/api/payments', paymentRouter);
-//lesson route for all lesson related endpoints
+
+// lesson route for all lesson related endpoints
 app.use('/api/lessons', lessonRouter);
-//section route
+
+// section route
 app.use('/api/sections', sectionRouter);
-//student learning route
+
+// student learning route
 app.use('/api/learning', studentLearningRouter);
-//lesson progress route
+
+// lesson progress route
 app.use('/api/lesson-progress', lessonProgressRouter);
-//certificate route
+
+// certificate route
 app.use('/api/certificates', certificateRouter);
-//student dashboard route
+
+// student dashboard route
 app.use('/api/dashboard/student', studentDashboardRouter);
-//instructor route
+
+// instructor route
 app.use('/api/instructor', instructorRoutes);
-//admin route
+
+// admin route
 app.use('/api/admin', adminRouter);
 app.use('/api/admin/courses', adminCourseRouter);
 app.use('/api/admin/users', adminUserRouter);
@@ -89,12 +97,11 @@ app.use('/api/admin/profile', adminProfileRouter);
 app.use('/api/admin/settings', adminSettingsRouter);
 app.use('/api/admin/activity-logs', adminActivityLogRouter);
 
-
 const startServer = async (): Promise<void> => {
   await connectDatabase();
 
-  app.listen(env.PORT, () => {
-    console.log(`SkillSphere API is running on http://localhost:${env.PORT}`);
+  app.listen(env.PORT, '0.0.0.0', () => {
+    console.log(`SkillSphere API is running on port ${env.PORT}`);
   });
 };
 
