@@ -23,6 +23,8 @@ import adminUserRouter from './route/admin/admin-user.routes.js';
 import adminActivityLogRouter from './route/admin/admin-activity-log.routes.js';
 import adminProfileRouter from './route/admin/admin-profile.routes.js';
 import adminSettingsRouter from './route/admin/admin-settings.routes.js';
+import { stripeWebhook } from './controller/payment/payment.controller.js';
+import paymentRouter from './route/payment/payment.routes.js';
 
 
 const app = express();
@@ -45,6 +47,13 @@ app.get('/api/health', (_req: Request, res: Response) => {
 
 // Better Auth handler must be before express.json()
 app.all('/api/auth/*splat', toNodeHandler(auth));
+app.post(
+  '/api/payments/stripe/webhook',
+  express.raw({
+    type: 'application/json',
+  }),
+  stripeWebhook
+);
 
 app.use(express.json());
 
@@ -56,6 +65,8 @@ app.use('/api', testRouter);
 app.use('/api/courses', courseRouter);
 //enrollment route for student enrollment related endpoints
 app.use('/api/enrollments', enrollmentRouter);
+//payment route
+app.use('/api/payments', paymentRouter);
 //lesson route for all lesson related endpoints
 app.use('/api/lessons', lessonRouter);
 //section route
@@ -77,6 +88,7 @@ app.use('/api/admin/users', adminUserRouter);
 app.use('/api/admin/profile', adminProfileRouter);
 app.use('/api/admin/settings', adminSettingsRouter);
 app.use('/api/admin/activity-logs', adminActivityLogRouter);
+
 
 const startServer = async (): Promise<void> => {
   await connectDatabase();

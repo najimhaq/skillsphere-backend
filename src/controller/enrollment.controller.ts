@@ -70,6 +70,14 @@ export const enrollInCourse = async (
     return;
   }
 
+  if (course.price > 0) {
+    res.status(402).json({
+      success: false,
+      message:
+        'This is a paid course. Please complete payment before enrolling.',
+    });
+    return;
+  }
   try {
     const enrollment = await Enrollment.create({
       studentId: new Types.ObjectId(user.id),
